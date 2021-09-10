@@ -5,22 +5,22 @@ services:
     image: tensorflow/serving:latest
     ports:
       - 8501:8501
-    environment: 
+    environment:
       - MODEL_NAME=movie_model
-    volumes: 
+    volumes:
       - ./ai-model/model:/models/movie_model
     depends_on: [mongo]
 
   mongo:
     image: "mongo"
     container_name: "movieDB"
-    environment: 
+    environment:
       - MONGO_INITDB_DATABASE=movieRecommenderDB
     volumes:
       - ./mongo-volume:/data/db
-    ports: 
+    ports:
       - 27017:27017
-  
+
   backend:
     build:
       context: backend/
@@ -28,8 +28,8 @@ services:
     image: movie-backend
     ports:
       - 8000:8000
-    depends_on: ["mongo"]
-    environment: 
+    depends_on: ["tensorflow-servings","mongo"]
+    environment:
       - MONGOHOST=mongo
       - TF_SERVING_HOST=tensorflow-servings
 

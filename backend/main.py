@@ -11,6 +11,8 @@ import requests
 import numpy as np
 import os
 import time
+import pprint
+import re
 
 MONGO_HOST = os.getenv("MONGOHOST")
 # TF_SERVING = "localhost"
@@ -49,28 +51,37 @@ def save_to_db(csv_file, file_size, jobId, collection):
         pass
     csv_file.file.seek(0)
     headers = csv_file.file.readline().decode().replace(";\n", "").split(";")
+    print(headers)
     for j, l in enumerate(csv_file.file):
         line = l.decode()
         line = line.replace(";\n", "")
+        # line_emems = re.search('((?:^|;)(?=[^"]|(")?)"?((?(1)[^"]*|[^;"]*))"?(?=;|$))', line)
         row_elem = line.split(";")
+        # movieId = line_emems.group(0)
+        # title = line_emems.group(1)
+        # genre = line_emems.group(2)
+        # print(title)
         if len(row_elem) > len(headers):
             job_doc = {"jobId": jobId,
                 "status": "Error",
                 "percentage": int((j/i)*100),
                 "reason": f"Ilegal Character in line {j}"}
+            print('Line: ' + j)
+            pprint.pprint(line)
+            pprint.pprint(job_doc)
             status_col.update_one({"jobId": jobId}, {"$set": job_doc})
         else:
             doc = {}
             for e in range(len(row_elem)):
                 doc[headers[e]] = row_elem[e]
             doc["index"] = _index + j
-            if collection.find_one(doc) is None: 
+            if collection.find_one(doc) is None:
                 collection.insert_one(doc)
             else:
                 pass
             status_col.update_one({"jobId": jobId}, {"$set": {"percentage": int((j/i)*100)}})
     status_col.update_one({"jobId": jobId}, {"$set": {"percentage": 100, "status": "complete", "fileName": csv_file.filename, "fileSize": file_size, "numOfRows": i}})
-            
+
 def make_movie_encoding():
     unique_movies = ratings_col.distinct("movieId")
     movie_encoder = {x: i for i, x in enumerate(unique_movies)}
@@ -160,12 +171,13 @@ def encode_movieIds(movieIds):
             encoded_movies.append([doc["index"]])
         else:
             pass
-        
+
     return encoded_movies
 
 def find_movies_not_watched(movieIndexs):
     indexs_to_watch = []
     movies_to_watch = movie_col.find({"$nor": [{"movieId": {"$in": movieIndexs}}]})
+    print(movies_to_watch)
     indexs_to_watch = [int(x["movieId"]) for x in movies_to_watch]
     return indexs_to_watch
 
@@ -207,16 +219,17 @@ def make_recomendation(movies: List, background_task: BackgroundTasks):
                 }
     insert_status(job_doc)
     background_task.add_task(generate_recommendations, movies, jobId)
-    
+
     return job_doc
 
 @app.get("/autocomplete")
 def get_autocomplete_movies():
     movie_all = movie_col.find()
+    pprint.pprint(movie_all)
     data = {}
     for doc in movie_all:
         data[doc["title"]] = doc["movieId"]
     return data
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="127.0.0.1", port=8000, log_level="info")
+    uvicorn.run("main:app", host="127.0.0.1", port=8000, log_level="debug")

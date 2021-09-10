@@ -12,13 +12,13 @@ LOCAL_DIR = os.getcwd()
 
 os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
 movielens_data_file_url = (
-    "http://files.grouplens.org/datasets/movielens/ml-latest-small.zip"
+    "https://fabian-hardt.de/OC/moviedata.zip"
 )
 movielens_zipped_file = keras.utils.get_file(
-    "ml-latest-small.zip", movielens_data_file_url, extract=False
+    "moviedata.zip", movielens_data_file_url, extract=False
 )
 keras_datasets_path = Path(movielens_zipped_file).parents[0]
-movielens_dir = keras_datasets_path / "ml-latest-small"
+movielens_dir = keras_datasets_path / "moviedata"
 
 # Only extract the data the first time the script is run.
 if not movielens_dir.exists():
@@ -29,7 +29,7 @@ if not movielens_dir.exists():
         print("Done!")
 
 ratings_file = movielens_dir / "ratings.csv"
-df = pd.read_csv(ratings_file)
+df = pd.read_csv(ratings_file, sep=';')
 
 user_ids = df["userId"].unique().tolist()
 user2user_encoded = {x: i for i, x in enumerate(user_ids)}
@@ -42,6 +42,7 @@ df["movie"] = df["movieId"].map(movie2movie_encoded)
 
 num_users = len(user2user_encoded)
 num_movies = len(movie_encoded2movie)
+print(num_movies)
 df["rating"] = df["rating"].values.astype(np.float32)
 # min and max ratings will be used to normalize the ratings later
 min_rating = min(df["rating"])
@@ -125,7 +126,7 @@ test_loss = model.evaluate(x_val, y_val)
 print('\nTest Loss: {}'.format(test_loss))
 
 print("Testing Model with 1 user")
-movie_df = pd.read_csv(movielens_dir / "movies.csv")
+movie_df = pd.read_csv(movielens_dir / "movies.csv", sep=';')
 user_id = "new_user"
 movies_watched_by_user = df.sample(5)
 movies_not_watched = movie_df[

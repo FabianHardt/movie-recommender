@@ -9,12 +9,12 @@
         var elems = document.querySelectorAll(".autocomplete");
         var instances = M.Autocomplete.init(elems, options);
     });
-    
+
     function addNewMovie(){
       var newMovie = document.getElementById("autocomplete-input").value
       movieTitles = [...movieTitles, newMovie]
     };
-    
+
 
 </script>
 
@@ -29,7 +29,7 @@
         <div class="input-field col s12">
           <input type="text" id="autocomplete-input" class="autocomplete" />
           <label for="autocomplete-input">Movies</label>
-          <button class="btn waves-effect waves-light" type="submit" name="action" on:click={() => addNewMovie()}>Add
+          <button class="btn waves-effect waves-light" type="submit" name="action" on:click={() => addNewMovie()}>Hinzufügen
             <i class="material-icons right">Movie</i>
           </button>
         </div>

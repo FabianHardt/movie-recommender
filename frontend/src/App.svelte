@@ -3,7 +3,6 @@
 	import "../node_modules/materialize-css/dist/js/materialize.min.js"
 	import { Router, Link, Route } from "svelte-routing";
 	import Navbar from "./components/Navbar.svelte";
-	import History from "./pages/History.svelte";
 	import Home from "./pages/Home.svelte"
 	
 </script>
@@ -15,11 +14,11 @@
 		padding: 1em;
 		max-width: 240px;
 		margin: 0 auto;
-		background-color: #d5274c;
+		background-color: #0066e8;
 	}
 
 	h1 {
-		color: #ff3e00;
+		color: #0066e8;
 		text-transform: uppercase;
 		font-size: 4em;
 		font-weight: 100;
@@ -36,6 +35,6 @@
 	<Navbar/>
 	<div class="container">
 		<Route path="/" component={Home} />
-		<Route path="/history" component={History} />
+		<!--Route path="/history" component={History} /-->
 	</div>
 </Router>

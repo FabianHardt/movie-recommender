@@ -98,6 +98,21 @@ def get_status_bulk_update(jobId: str):
     job_doc = json.loads(json_util.dumps(job_doc))
     return job_doc
 
+@app.get("/wait-status/{jobId}")
+def get_status_bulk_update(jobId: str):
+    condition = 0
+    while(condition == 0):
+        job_doc = status_col.find_one({"jobId": jobId}, {'_id': False})
+        job_doc = json.loads(json_util.dumps(job_doc))
+        print(job_doc)
+        if(job_doc['status'] == 'inProgress'):
+            print('inProgress')
+            time.sleep(2)
+        else:
+            print('ready')
+            condition = 1
+    return job_doc
+
 def insert_status(doc):
     status_col.insert_one(json.loads(json.dumps(doc)))
 
@@ -227,6 +242,14 @@ def get_autocomplete_movies():
         data[doc["title"]] = doc["movieId"]
     return data
 
+@app.get("/all-movies")
+def get_all_movies():
+    movie_all = movie_col.find()
+    data = {'movie_ids': []}
+    for doc in movie_all:
+        data['movie_ids'].append(doc["movieId"])
+    return data
+
 @app.get("/movie/")
 def get_movies_by_name(movieName: str):
     print(movieName)
@@ -247,6 +270,12 @@ def get_movieId_movieName_by_name(movieName: str):
     for doc in found_movie:
         print(doc)
         data['movie_ids'].append({'movieId': doc["movieId"], 'title': doc["title"]})
+    return data
+
+@app.get("/sleep")
+def do_sleep():
+    data = {}
+    time.sleep(60)
     return data
 
 if __name__ == "__main__":

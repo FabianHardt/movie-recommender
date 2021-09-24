@@ -98,6 +98,13 @@ def get_status_bulk_update(jobId: str):
     job_doc = json.loads(json_util.dumps(job_doc))
     return job_doc
 
+# transformation endpoint for chatbot
+@app.get("/remove_year/{movieName}")
+def remove_year(movieName: str):
+    tmpMovieNameCleared = re.sub(r'\(.*\)','', movieName)
+    movieNameCleared = tmpMovieNameCleared.rstrip()
+    return movieNameCleared
+
 @app.get("/wait-status/{jobId}")
 def get_status_bulk_update(jobId: str):
     condition = 0
